@@ -52,6 +52,20 @@ pipeline {
       }
       steps {
         script {
+          def containerName = 'myhello'
+          def dockerHost = 'tcp://172.31.17.35:2375'
+
+          // Check if the container is running
+          def isContainerRunning = sh(script: "docker -H $dockerHost ps -q -f name=$containerName", returnStatus: true) == 0
+	
+          // If the container is running, stop and remove it
+          if (isContainerRunning) {
+            echo "Stopping and removing existing container: $containerName"
+            sh "docker -H $dockerHost container stop $containerName"
+            sh "docker -H $dockerHost container rm $containerName"
+          } else {
+            echo "No existing container found with the name: $containerName"
+          }
           sh 'docker -H tcp://172.31.17.35:2375 container run --detach --name myhello -p 80:8080 ldstoson/myhello:$BUILD_NUMBER'
         }
       }
