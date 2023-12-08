@@ -5,7 +5,7 @@ pipeline {
     stage('Checkout') {
       agent any
       steps {
-        git branch: 'main', url: '<URL>'
+        git branch: 'main', url: 'https://github.com/ldstoson/source-maven-java-spring-hello-webapp'
       }
     }
     stage('Build') {
@@ -27,20 +27,22 @@ pipeline {
     stage('Build Docker Image') {
       agent any
       steps {
-        sh '<COMMAND>'
+        sh 'docker image build -t myhello .'
       }
     }
     stage('Tag Docker Image') {
       agent any
       steps {
-        sh '<COMMAND>'
+        sh 'docker image tag myhello ldstoson/myhello:$BUILD_NUMBER'
+        sh 'docker image tag myhello ldstoson/myhello:latest'
       }
     }
     stage('Publish Docker Image') {
       agent any
       steps {
         withDockerRegistry(credentialsId: 'docker-hub-token', url: 'https://index.docker.io/v1/') {
-          sh '<COMMAND>'
+          sh 'docker image push ldstoson/myhello:$BUILD_NUMBER'
+	  sh 'docker image push ldstoson/myhello:latest'
         }
       }
     }
@@ -49,7 +51,7 @@ pipeline {
         docker { image 'docker:dind' }
       }
       steps {
-        sh 'docker -H tcp://<DOCKER_HOST_PRIVATE_IP>:2375 container run --detach --name <CONTAINER_NAME> -p 80:8080 <IMAGE>:$BUILD_NUMBER'
+        sh 'docker -H tcp://172.31.17.168:2375 container run --detach --name myhello -p 80:8080 ldstoson/myhello:$BUILD_NUMBER'
       }
     }
   }
