@@ -47,9 +47,10 @@ pipeline {
       }
     }
     stage('Run Docker Container') {
-      agent {
-        docker { image 'docker:dind' }
-      }
+      agent any
+#      agent {
+#        docker { image 'docker:dind' }
+#      }
       steps {
         sh 'docker -H tcp://172.31.17.35:2375 container run --detach --name myhello -p 80:8080 ldstoson/myhello:$BUILD_NUMBER'
       }
